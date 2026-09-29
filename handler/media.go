@@ -9,7 +9,7 @@ import (
 )
 
 func UploadHandler(w http.ResponseWriter, r *http.Request) {
-	r.Body = http.MaxBytesReader(w, r.Body, 15<<20)
+	r.Body = http.MaxBytesReader(w, r.Body, 1000<<20)
 
 	err := r.ParseMultipartForm(1000 << 20)
 	if err != nil {
