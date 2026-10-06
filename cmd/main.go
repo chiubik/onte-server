@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 	"x/onte-server/internal"
 	"x/onte-server/internal/handler"
 
@@ -16,9 +17,9 @@ import (
 
 func main() {
 	ch := make(chan string, 1)
-	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	go internal.CloudtunnelRun(ctx, ch)
-	defer cancel()
+	defer stop()
 
 	mux := http.NewServeMux()
 
@@ -49,9 +50,10 @@ func main() {
 	}()
 
 	<-ctx.Done()
-	err := srv.Shutdown(context.Background())
+	wait, cancel := context.WithTimeout(context.Background(), 30*time.Second) //added a timeout if there will be a problem to shutdown the server
+	defer cancel()
+	err := srv.Shutdown(wait)
 	if err != nil {
 		log.Fatalf("error: %s", err)
 	}
-
 }
