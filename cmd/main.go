@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"syscall"
 	"x/onte-server/internal"
 	"x/onte-server/internal/handler"
 
@@ -15,7 +16,7 @@ import (
 
 func main() {
 	ch := make(chan string, 1)
-	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
+	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	go internal.CloudtunnelRun(ctx, ch)
 	defer cancel()
 
@@ -33,6 +34,9 @@ func main() {
 	go func() {
 		fmt.Println("Server is running...")
 		url := <-ch
+		if url == "" {
+			log.Fatal("Didn't get url")
+		}
 		identifier := internal.GenerateIdentifier()
 		fmt.Println("Url: " + url)
 		fmt.Println("Identifier: " + identifier)
@@ -40,7 +44,7 @@ func main() {
 		qrterminal.Generate(data, qrterminal.L, os.Stdout)
 		err := srv.ListenAndServe()
 		if err != nil {
-			log.Fatalf("error: %s", err)
+			fmt.Println("error: %s", err)
 		}
 	}()
 
