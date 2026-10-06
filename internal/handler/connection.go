@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"x/flap/pkg"
+	"x/onte-server/internal"
 )
 
 type User struct {
@@ -14,7 +14,7 @@ type User struct {
 func IdentifierHandler(w http.ResponseWriter, r *http.Request) {
 	user := User{}
 
-	user.Identifier = pkg.GenerateIdentifier()
+	user.Identifier = internal.GenerateIdentifier()
 	body, err := json.Marshal(&user)
 	if err != nil {
 		fmt.Print(err)

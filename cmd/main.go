@@ -7,15 +7,17 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"syscall"
-	"x/flap/handler"
-	"x/flap/pkg"
+	"x/onte-server/internal"
+	"x/onte-server/internal/handler"
+
+	"github.com/mdp/qrterminal"
 )
 
 func main() {
-	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
-	go pkg.CloudtunnelRun(ctx)
-	defer stop()
+	ch := make(chan string, 1)
+	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
+	go internal.CloudtunnelRun(ctx, ch)
+	defer cancel()
 
 	mux := http.NewServeMux()
 
@@ -23,9 +25,29 @@ func main() {
 	mux.HandleFunc("POST /upload", handler.UploadHandler)
 	mux.HandleFunc("GET /donwload", handler.DownloadHandler)
 
-	fmt.Print("Server is running...")
-	err := http.ListenAndServe(":3333", mux)
+	srv := &http.Server{
+		Addr:    ":3333",
+		Handler: mux,
+	}
+
+	go func() {
+		fmt.Println("Server is running...")
+		url := <-ch
+		identifier := internal.GenerateIdentifier()
+		fmt.Println("Url: " + url)
+		fmt.Println("Identifier: " + identifier)
+		data := url + "+" + identifier
+		qrterminal.Generate(data, qrterminal.L, os.Stdout)
+		err := srv.ListenAndServe()
+		if err != nil {
+			log.Fatalf("error: %s", err)
+		}
+	}()
+
+	<-ctx.Done()
+	err := srv.Shutdown(context.Background())
 	if err != nil {
 		log.Fatalf("error: %s", err)
 	}
+
 }

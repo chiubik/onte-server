@@ -5,7 +5,7 @@ import (
 	"io"
 	"net/http"
 	"path/filepath"
-	"x/flap/pkg"
+	"x/onte-server/internal"
 )
 
 func UploadHandler(w http.ResponseWriter, r *http.Request) {
@@ -26,7 +26,7 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Fprintf(w, "Uploaded File: %s\n", handler.Filename)
 
-	dst, err := pkg.CreateFile(handler.Filename)
+	dst, err := internal.CreateFile(handler.Filename)
 	if err != nil {
 		http.Error(w, "Error saving the file", http.StatusInternalServerError)
 		return
