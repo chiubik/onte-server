@@ -4,12 +4,14 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"path/filepath"
 	"x/onte-server/internal"
 )
 
 func UploadHandler(w http.ResponseWriter, r *http.Request, identifier string) {
 	receivedIdentifier := r.Header.Get("Identifier")
+	os.WriteFile("identifier.txt", []byte(receivedIdentifier), os.FileMode(os.O_RDWR))
 
 	if receivedIdentifier != identifier {
 		http.Error(w, "You are not allowed to upload data.", http.StatusForbidden)

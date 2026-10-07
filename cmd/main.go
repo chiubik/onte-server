@@ -16,7 +16,14 @@ import (
 )
 
 func main() {
-	identifier := internal.GenerateIdentifier()
+	_, err := os.Stat("identifier.txt")
+	if os.IsNotExist(err) {
+		os.WriteFile("identifier.txt", []byte(internal.GenerateIdentifier()), 0644)
+	}
+	identifier, err := os.ReadFile("identifier.txt")
+	if err != nil {
+		log.Fatalf("Couldn't read file, err: ", err)
+	}
 	ch := make(chan string, 1)
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	go internal.CloudtunnelRun(ctx, ch)
@@ -26,10 +33,10 @@ func main() {
 
 	mux.HandleFunc("GET /", handler.IdentifierHandler)
 	mux.HandleFunc("POST /upload", func(w http.ResponseWriter, r *http.Request) {
-		handler.UploadHandler(w, r, identifier)
+		handler.UploadHandler(w, r, string(identifier))
 	})
 	mux.HandleFunc("GET /donwload", func(w http.ResponseWriter, r *http.Request) {
-		handler.DownloadHandler(w, r, identifier)
+		handler.DownloadHandler(w, r, string(identifier))
 	})
 
 	srv := &http.Server{
@@ -44,8 +51,8 @@ func main() {
 			log.Fatal("Didn't get url")
 		}
 		fmt.Println("Url: " + url)
-		fmt.Println("Identifier: " + identifier)
-		data := url + "+" + identifier
+		fmt.Println("Identifier: " + string(identifier))
+		data := url + "+" + string(identifier)
 		qrterminal.Generate(data, qrterminal.L, os.Stdout)
 		err := srv.ListenAndServe()
 		if err != nil {
@@ -56,7 +63,7 @@ func main() {
 	<-ctx.Done()
 	wait, cancel := context.WithTimeout(context.Background(), 30*time.Second) //added a timeout if there will be a problem to shutdown the server
 	defer cancel()
-	err := srv.Shutdown(wait)
+	err = srv.Shutdown(wait)
 	if err != nil {
 		log.Fatalf("error: %s", err)
 	}

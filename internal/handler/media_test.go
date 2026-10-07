@@ -123,7 +123,7 @@ func TestDownloadHandlerIdentifierVericifation(t *testing.T) {
 
 	rr := httptest.NewRecorder()
 
-	UploadHandler(rr, req, identifier)
+	DownloadHandler(rr, req, identifier)
 
 	if status := rr.Code; status == http.StatusOK {
 		t.Errorf("Handler passed Header but shouldn't.")
