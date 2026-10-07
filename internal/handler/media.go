@@ -8,7 +8,14 @@ import (
 	"x/onte-server/internal"
 )
 
-func UploadHandler(w http.ResponseWriter, r *http.Request) {
+func UploadHandler(w http.ResponseWriter, r *http.Request, identifier string) {
+	receivedIdentifier := r.Header.Get("Identifier")
+
+	if receivedIdentifier != identifier {
+		http.Error(w, "You are not allowed to upload data.", http.StatusForbidden)
+		return
+	}
+
 	r.Body = http.MaxBytesReader(w, r.Body, 1000<<20)
 
 	err := r.ParseMultipartForm(1000 << 20)
@@ -39,7 +46,14 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func DownloadHandler(w http.ResponseWriter, r *http.Request) {
+func DownloadHandler(w http.ResponseWriter, r *http.Request, identifier string) {
+	receivedIdentifier := r.Header.Get("Identifier")
+
+	if receivedIdentifier != identifier {
+		http.Error(w, "You are not allowed to upload data.", http.StatusForbidden)
+		return
+	}
+
 	filename := r.URL.Query().Get("file")
 
 	filename = filepath.Base(filename)

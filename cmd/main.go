@@ -16,6 +16,7 @@ import (
 )
 
 func main() {
+	identifier := internal.GenerateIdentifier()
 	ch := make(chan string, 1)
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	go internal.CloudtunnelRun(ctx, ch)
@@ -24,8 +25,12 @@ func main() {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("GET /", handler.IdentifierHandler)
-	mux.HandleFunc("POST /upload", handler.UploadHandler)
-	mux.HandleFunc("GET /donwload", handler.DownloadHandler)
+	mux.HandleFunc("POST /upload", func(w http.ResponseWriter, r *http.Request) {
+		handler.UploadHandler(w, r, identifier)
+	})
+	mux.HandleFunc("GET /donwload", func(w http.ResponseWriter, r *http.Request) {
+		handler.DownloadHandler(w, r, identifier)
+	})
 
 	srv := &http.Server{
 		Addr:    ":3333",
@@ -38,7 +43,6 @@ func main() {
 		if url == "" {
 			log.Fatal("Didn't get url")
 		}
-		identifier := internal.GenerateIdentifier()
 		fmt.Println("Url: " + url)
 		fmt.Println("Identifier: " + identifier)
 		data := url + "+" + identifier
