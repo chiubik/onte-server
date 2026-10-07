@@ -83,7 +83,7 @@ func TestUploadHandlerIdentifierVericifation(t *testing.T) {
 
 	UploadHandler(rr, req, identifier)
 
-	if status := rr.Code; status == http.StatusOK {
+	if status := rr.Code; status != http.StatusForbidden {
 		t.Errorf("Handler passed Header but shouldn't.")
 	}
 
@@ -125,7 +125,7 @@ func TestDownloadHandlerIdentifierVericifation(t *testing.T) {
 
 	DownloadHandler(rr, req, identifier)
 
-	if status := rr.Code; status == http.StatusOK {
+	if status := rr.Code; status != http.StatusForbidden {
 		t.Errorf("Handler passed Header but shouldn't.")
 	}
 

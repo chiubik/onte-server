@@ -18,7 +18,7 @@ import (
 func main() {
 	_, err := os.Stat("identifier.txt")
 	if os.IsNotExist(err) {
-		os.WriteFile("identifier.txt", []byte(internal.GenerateIdentifier()), 0644)
+		os.WriteFile("identifier.txt", []byte(internal.GenerateIdentifier()), 0600)
 	}
 	identifier, err := os.ReadFile("identifier.txt")
 	if err != nil {
