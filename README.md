@@ -1,0 +1,34 @@
+# Onte Server
+
+The backend for a file-sharing application. It stores files and allows clients to upload and download them.
+
+## Installation
+
+Requires Git and Docker.
+
+1. Clone the repository:
+
+   ```bash
+   git clone https://github.com/chiubik/onte-server.git
+   cd onte-server
+   ```
+
+2. Build the Docker image:
+
+   ```bash
+   docker build -t onte-server .
+   ```
+
+3. Run the container in the background:
+
+   ```bash
+   docker run -d --name onte-server onte-server
+   ```
+
+4. View the connection URL, identifier, and QR code in the logs:
+
+   ```bash
+   docker logs -f onte-server
+   ```
+
+   Use these details to connect from the client application.
