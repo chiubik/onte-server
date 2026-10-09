@@ -30,5 +30,3 @@ Requires Git and Docker.
    ```bash
    docker logs -f onte-server
    ```
-
-   Use these details to connect from the client application.
