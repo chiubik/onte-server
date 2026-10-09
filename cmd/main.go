@@ -24,6 +24,10 @@ func main() {
 	if err != nil {
 		log.Fatalf("Couldn't read file, err: ", err)
 	}
+	if string(identifier) == "" {
+		os.Remove("identifier.txt")
+		os.WriteFile("identifier.txt", []byte(internal.GenerateIdentifier()), 0600)
+	}
 	ch := make(chan string, 1)
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	go internal.CloudtunnelRun(ctx, ch)
