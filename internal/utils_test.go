@@ -1,4 +1,4 @@
-package pkg
+package internal
 
 import (
 	"context"
@@ -18,11 +18,10 @@ func TestCloudtunnelRun(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	url, err := CloudtunnelRun(ctx)
-	if err != nil {
-		t.Errorf("error: %s", err)
-	}
+	ch := make(chan string, 1)
+	CloudtunnelRun(ctx, ch)
 
+	url := <-ch
 	t.Log(url)
 
 	if strings.Contains(url, "Couldn't find tunnel") {

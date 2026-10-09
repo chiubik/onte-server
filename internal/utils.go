@@ -1,4 +1,4 @@
-package pkg
+package internal
 
 import (
 	"bufio"
@@ -38,19 +38,19 @@ func GenerateIdentifier() string {
 	return sb.String()
 }
 
-func CloudtunnelRun(ctx context.Context) (string, error) {
-	re := regexp.MustCompile(`https://[a-zA-Z0-9-]+\.trycloudflare\.com`)
+func CloudtunnelRun(ctx context.Context, ch chan string) {
+	re := regexp.MustCompile(`https://[a-z-]+\.trycloudflare\.com`)
 	cmd := exec.CommandContext(ctx, "cloudflared", "tunnel", "--url", "http://localhost:3333")
 	stderr, err := cmd.StderrPipe()
 	if err != nil {
 		fmt.Print(err)
-		return "error: ", err
+		return
 	}
 
 	err = cmd.Start()
 	if err != nil {
 		fmt.Print(err)
-		return "error: ", err
+		return
 	}
 
 	c := make(chan string, 1)
@@ -74,11 +74,15 @@ func CloudtunnelRun(ctx context.Context) (string, error) {
 	select {
 	case u, ok := <-c:
 		if !ok {
-			return "", fmt.Errorf("Cloudflared exited without printing a tunnel URL")
+			fmt.Errorf("Cloudflared exited without printing a tunnel URL")
+			return
 		}
-		return u, nil
+		ch <- u
+		close(ch)
 	case <-time.After(30 * time.Second):
 		cmd.Process.Kill()
-		return "", fmt.Errorf("Timed out waiting for new tunnel URL")
+		fmt.Errorf("Timed out waiting for new tunnel URL")
+		return
 	}
+
 }
