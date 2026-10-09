@@ -1,8 +1,8 @@
-#Onte Server
+# Onte Server
 
 The backend for a file-sharing application. It stores files and allows clients to upload and download them.
 
-##Installation
+## Installation
 
 Requires Git and Docker.
 
